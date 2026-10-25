@@ -31,6 +31,7 @@ class CH4_HOMEWORK_2_API ADriveGameMode : public AGameMode
 public:
 	void BroadcastNewChat(ADrivePlayerController* InChattingPlayerController, const FString& InChatMessageString);
 	
+	void StealCoin(AController* Attacker, AController* Victim);
 protected:
 
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;

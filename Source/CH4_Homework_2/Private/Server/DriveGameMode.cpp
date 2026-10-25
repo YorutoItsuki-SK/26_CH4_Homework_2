@@ -5,7 +5,6 @@
 
 #include "Client/DrivePlayerController.h"
 #include "Client/DrivePlayerState.h"
-#include "Context/DriveStruct.h"
 
 void ADriveGameMode::BroadcastNewChat(ADrivePlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
@@ -23,6 +22,22 @@ void ADriveGameMode::BroadcastNewChat(ADrivePlayerController* InChattingPlayerCo
 	for (ADrivePlayerController* DPC : AllPlayers) {
 		DPC->ClientRPCSendMessage(NewChatMessage);
 	}
+}
+
+void ADriveGameMode::StealCoin(AController* Attacker, AController* Victim)
+{
+	if (!Attacker || !Victim) return;
+
+	ADrivePlayerState* AttackerPS = Attacker->GetPlayerState<ADrivePlayerState>();
+	ADrivePlayerState* VictimPS = Victim->GetPlayerState<ADrivePlayerState>();
+
+	if (!AttackerPS || !VictimPS) return;
+
+	int32 VictimCoin = VictimPS->GetCoin();
+	if (VictimCoin < 5) return;
+
+	VictimPS->SubCoin(5);
+	AttackerPS->AddCoin(5);
 }
 
 void ADriveGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
