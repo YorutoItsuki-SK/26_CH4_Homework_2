@@ -5,10 +5,21 @@
 #include "CoreMinimal.h"
 #include "DriveStruct.generated.h"
 
+UENUM(BlueprintType)
+enum class EChatMessageType : uint8
+{
+	None
+	, Notice
+	, Normal
+};
+
 USTRUCT(BlueprintType)
 struct FChatMessage 
 {
 	GENERATED_BODY()
+
+	UPROPERTY()
+	EChatMessageType ChatMessageType = EChatMessageType::None;
 
 	UPROPERTY()
 	FDateTime Time;
