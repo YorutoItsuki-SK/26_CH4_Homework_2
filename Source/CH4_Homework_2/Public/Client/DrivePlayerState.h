@@ -42,7 +42,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 protected:
-	void SetBounusMaxSpeed(int32 NewBonusMaxSpeed);
+	void AddBonusMaxSpeed(int32 InBonusMaxSpeed);
 
 	UFUNCTION()
 	void OnRep_BonusMaxSpeed();

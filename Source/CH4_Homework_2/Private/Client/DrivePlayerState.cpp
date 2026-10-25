@@ -20,9 +20,11 @@ void ADrivePlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ThisClass, Coin, COND_OwnerOnly);
 }
 
-void ADrivePlayerState::SetBounusMaxSpeed(int32 NewBonusMaxSpeed)
+void ADrivePlayerState::AddBonusMaxSpeed(int32 InBonusMaxSpeed)
 {
-	BonusMaxSpeed = FMath::Max(0, NewBonusMaxSpeed);
+	if (!HasAuthority()) return;
+	if (InBonusMaxSpeed <= 0) return;
+	BonusMaxSpeed += InBonusMaxSpeed;
 
 	OnStatChanged.Broadcast(Stat_BonusMaxSpeed, BonusMaxSpeed);
 }
