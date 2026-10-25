@@ -54,6 +54,7 @@ void UChatLog::NativeDestruct()
 
 void UChatLog::ReciveChat(FChatMessage InChat)
 {
+	if (InChat.ChatMessageType != EChatMessageType::Normal) return;
 	FDateTime publishedDateTime = InChat.Time;
 	FString publishedTime = publishedDateTime.ToString(TEXT("%y:%m:%d %H:%M"));
 	FString CombinedMessage = TEXT("[") + publishedTime + TEXT("] ") + InChat.Sender + TEXT(" : ") + InChat.Message;
