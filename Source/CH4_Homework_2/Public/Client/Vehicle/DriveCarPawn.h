@@ -11,7 +11,9 @@ class UCameraComponent;
 class USpringArmComponent;
 class UInputAction;
 class UChaosWheeledVehicleMovementComponent;
+class USceneComponent;
 struct FInputActionValue;
+class UParticleSystemComponent;
 
 class ADrivePlayerState;
 
@@ -29,6 +31,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USceneComponent* TracePoint;
 
 	TObjectPtr<UChaosWheeledVehicleMovementComponent> ChaosVehicleMovement;
 
@@ -53,6 +58,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> EnterAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> AttackAction;
+
 	FDelegateHandle MaxSpeedHandle;
 
 	UPROPERTY(EditAnywhere, Category = "Stat|Speed")
@@ -60,8 +68,14 @@ protected:
 
 	int32 FinalMaxSpeed = 100;
 
+	UPROPERTY(EditAnywhere, Category = "Stat|Attack|Range")
+	float AttackRange = 500.f;
+
 	UPROPERTY()
-	TObjectPtr<ADrivePlayerState> CachedDPS;
+	TObjectPtr<ADrivePlayerState> CachedDPS; 
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UParticleSystemComponent> Particle;
 
 protected:
 	virtual void Tick(float Delta) override;
@@ -100,6 +114,8 @@ protected:
 
 	void UpdateMaxSpeed(FGameplayTag StatTag, int32 NewBonusMaxSpeed);
 
+	void Attack(const FInputActionValue& Value);
+
 public:
 
 	UFUNCTION(BlueprintCallable, Category = "Input")
@@ -131,4 +147,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Input")
 	void DoEnableChat();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Input")
+	void DoAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void DoAttackDebugLine(FVector StartPoint, FVector EndPoint, FColor Color);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayParticle(const FHitResult& HitResult);
 };

@@ -9,11 +9,14 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
+#include "Components/SceneComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 
 #include "CH4_Homework_2SportsWheelFront.h"
 #include "CH4_Homework_2SportsWheelRear.h"
 
 #include "Client/DrivePlayerState.h"
+#include "Server/DriveGameMode.h"
 
 // Sets default values
 ADriveCarPawn::ADriveCarPawn()
@@ -40,6 +43,16 @@ ADriveCarPawn::ADriveCarPawn()
 	// Configure the car mesh
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionProfileName(FName("Vehicle"));
+
+	TracePoint = CreateDefaultSubobject<USceneComponent>(TEXT("TracePoint"));
+
+	TracePoint->SetupAttachment(GetMesh());
+
+	TracePoint->SetRelativeLocation(FVector(180.f, 0.f, 50.f));
+
+	Particle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Particle"));
+	Particle->SetupAttachment(GetMesh());
+	Particle->SetAutoActivate(false);
 
 	// get the Chaos Wheeled movement component
 	ChaosVehicleMovement = CastChecked<UChaosWheeledVehicleMovementComponent>(GetVehicleMovement());
@@ -187,6 +200,13 @@ void ADriveCarPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("ADriveCarPawn::SetupPlayerInputComponent => ResetVehicleAction Null"));
 	}
+
+	if (AttackAction) {
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ADriveCarPawn::Attack);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("ADriveCarPawn::SetupPlayerInputComponent => AttackAction Null"));
+	}
 }
 
 void ADriveCarPawn::PossessedBy(AController* NewController)
@@ -263,6 +283,11 @@ void ADriveCarPawn::UpdateMaxSpeed(FGameplayTag StatTag, int32 NewBonusMaxSpeed)
 {
 	if (StatTag != Stat_Coin) return;
 	FinalMaxSpeed = DefaultMaxSpeed + NewBonusMaxSpeed;
+}
+
+void ADriveCarPawn::Attack(const FInputActionValue& Value)
+{
+	DoAttack();
 }
 
 void ADriveCarPawn::DoSteering(float SteeringValue)
@@ -355,5 +380,70 @@ void ADriveCarPawn::DoEnableChat()
 	FInputModeUIOnly InputModeUIOnly;
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	PC->SetInputMode(InputModeUIOnly);
+}
+
+void ADriveCarPawn::PlayParticle_Implementation(const FHitResult& HitResult)
+{
+	if (HasAuthority()) return;
+
+	const FVector Location = HitResult.ImpactPoint;
+	const FVector Normal = HitResult.ImpactNormal;
+	const FRotator Rotation = Normal.Rotation();
+
+	Particle->SetWorldLocation(Location);
+	Particle->SetWorldRotation(Rotation);
+	Particle->Activate(true);
+}
+
+void ADriveCarPawn::DoAttackDebugLine_Implementation(FVector StartPoint, FVector EndPoint, FColor Color)
+{
+	DrawDebugLine(
+		GetWorld()
+		, StartPoint
+		, EndPoint
+		, Color
+		, false
+		, 1.f
+		, 0
+		, 2.f
+	);
+}
+
+void ADriveCarPawn::DoAttack_Implementation()
+{
+	if (!HasAuthority() || !TracePoint) return;
+
+	const FVector StartPoint = TracePoint->GetComponentLocation();
+	const FVector Direction = TracePoint->GetForwardVector();
+	const FVector EndPoint = StartPoint + (Direction * AttackRange);
+
+	FHitResult Result;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Result
+		, StartPoint
+		, EndPoint
+		, ECC_Visibility
+		, Params
+	);
+
+	DoAttackDebugLine(StartPoint, EndPoint, bHit ? FColor::Red : FColor::Green);
+
+	if (!bHit) return;
+
+	AActor* ResultActor = Result.GetActor();
+	ADriveCarPawn* OtherCarPawn = Cast<ADriveCarPawn>(ResultActor);
+
+	if (!OtherCarPawn) return;
+
+	OtherCarPawn->PlayParticle(Result);
+
+	ADriveGameMode* DGM = Cast<ADriveGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!DGM) return;
+
+	DGM->StealCoin(this->GetController(), OtherCarPawn->GetController());
 }
 
