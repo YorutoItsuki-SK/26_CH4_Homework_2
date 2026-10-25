@@ -20,6 +20,8 @@ ADriveCarPawn::ADriveCarPawn()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	Tags.Add(FName("Player"));
+
 	// construct the back camera boom
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Back Spring Arm"));
 	SpringArm->SetupAttachment(GetMesh());
