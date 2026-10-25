@@ -20,12 +20,27 @@ struct FChatMessage
 	FString Message;
 };
 
-/**
- * 
- */
-class CH4_HOMEWORK_2_API DriveStruct
+UENUM(BlueprintType)
+enum class ERoomState : uint8
 {
-public:
-	DriveStruct();
-	~DriveStruct();
+	None,
+	Waiting,
+	Playing,
+	Ending,
+	End
+};
+
+USTRUCT(BlueprintType)
+struct FRoomStateData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	ERoomState RoomState = ERoomState::None;
+
+	UPROPERTY()
+	double StartTime = 0.0;
+
+	UPROPERTY()
+	double EndTime = 0.0;
 };
