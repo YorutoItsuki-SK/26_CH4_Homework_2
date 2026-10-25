@@ -40,6 +40,11 @@ void ADriveGameMode::StealCoin(AController* Attacker, AController* Victim)
 	AttackerPS->AddCoin(5);
 }
 
+ERoomState ADriveGameMode::GetRoomState() const
+{
+	return RoomState;
+}
+
 void ADriveGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
@@ -84,5 +89,11 @@ void ADriveGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RoomState = ERoomState::Waiting;
+	ChangeRoomState(ERoomState::Waiting);
+}
+
+void ADriveGameMode::ChangeRoomState(ERoomState InRoomState)
+{
+	RoomState = InRoomState;
+	OnRoomStateChanged.Broadcast(RoomState);
 }

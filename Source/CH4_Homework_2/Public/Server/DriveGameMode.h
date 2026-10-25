@@ -4,23 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "Context/DriveStruct.h"
 #include "DriveGameMode.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRoomStateChanged, ERoomState);
 
 class ADrivePlayerController;
 
 /**
  * 
  */
-
-UENUM(BlueprintType)
-enum class ERoomState : uint8
-{
-	None,
-	Waiting,
-	Playing,
-	Ending,
-	End
-};
 
 
 UCLASS()
@@ -29,9 +22,15 @@ class CH4_HOMEWORK_2_API ADriveGameMode : public AGameMode
 	GENERATED_BODY()
 
 public:
+	FOnRoomStateChanged OnRoomStateChanged;
+
+public:
 	void BroadcastNewChat(ADrivePlayerController* InChattingPlayerController, const FString& InChatMessageString);
-	
+
 	void StealCoin(AController* Attacker, AController* Victim);
+
+	ERoomState GetRoomState() const;
+
 protected:
 
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
@@ -49,4 +48,9 @@ protected:
 
 	UPROPERTY()
 	TArray<TObjectPtr<ADrivePlayerController>> AllPlayers;
+
+
+
+protected:
+	void ChangeRoomState(ERoomState InRoomState);
 };
