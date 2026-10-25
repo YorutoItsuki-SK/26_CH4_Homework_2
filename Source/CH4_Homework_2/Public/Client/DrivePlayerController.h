@@ -39,6 +39,8 @@ protected:
 
 	virtual void SetupInputComponent() override;
 
+	virtual void OnRep_PlayerState() override;
+
 protected:
 	UPROPERTY()
 	TObjectPtr<ADriveGameMode> CachedDGM;

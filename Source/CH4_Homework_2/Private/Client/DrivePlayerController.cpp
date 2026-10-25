@@ -28,21 +28,6 @@ void ADrivePlayerController::ClientRPCSendMessage_Implementation(const FChatMess
 void ADrivePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (!IsLocalController()) {
-		UE_LOG(LogTemp, Warning, TEXT("ADrivePlayerController::BeginPlay => IsLocalController false"));
-		return;
-	}
-		
-	
-
-	/*FInputModeUIOnly InputModeUIOnly;
-	SetInputMode(InputModeUIOnly);*/
-
-	if (MainHudClass) {
-		MainHud = CreateWidget<UUserWidget>(this, MainHudClass);
-		MainHud->AddToViewport();
-	}
 }
 
 void ADrivePlayerController::SetupInputComponent()
@@ -50,7 +35,6 @@ void ADrivePlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	if (!IsLocalPlayerController()) {
-		UE_LOG(LogTemp, Warning, TEXT("ADrivePlayerController::SetupInputComponent => IsLocalController false"));
 		return;
 	}
 
@@ -64,5 +48,17 @@ void ADrivePlayerController::SetupInputComponent()
 	for (UInputMappingContext* CurrentContext : DefaultMappingContexts)
 	{
 		Subsystem->AddMappingContext(CurrentContext, 0);
+	}
+}
+
+void ADrivePlayerController::OnRep_PlayerState()
+{
+	if (!IsLocalController()) {
+		return;
+	}
+
+	if (MainHudClass) {
+		MainHud = CreateWidget<UUserWidget>(this, MainHudClass);
+		MainHud->AddToViewport();
 	}
 }
