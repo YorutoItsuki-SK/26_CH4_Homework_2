@@ -88,12 +88,65 @@ void ADriveGameMode::Logout(AController* Exiting)
 void ADriveGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	ChangeRoomState(ERoomState::Waiting);
 }
 
 void ADriveGameMode::ChangeRoomState(ERoomState InRoomState)
 {
 	RoomState = InRoomState;
-	OnRoomStateChanged.Broadcast(RoomState);
+	FRoomStateData NewRoomStateData;
+	NewRoomStateData.RoomState = InRoomState; 
+
+	if (InRoomState == ERoomState::Waiting) {
+		float WaittingTime = 20.f;
+		NewRoomStateData.StartTime = GetWorld()->GetGameState()->GetServerWorldTimeSeconds();
+		NewRoomStateData.EndTime = NewRoomStateData.StartTime + WaittingTime;
+		GetWorldTimerManager().SetTimer(RoomTimer, this, &ADriveGameMode::StartGame, WaittingTime, false);
+	}
+
+	if (InRoomState == ERoomState::Playing) {
+		float MatchTime = 60.f;
+		NewRoomStateData.StartTime = GetWorld()->GetGameState()->GetServerWorldTimeSeconds();
+		NewRoomStateData.EndTime = NewRoomStateData.StartTime + MatchTime;
+		GetWorldTimerManager().SetTimer(RoomTimer, this, &ADriveGameMode::EndGame, MatchTime, false);
+	}
+	OnRoomStateChanged.Broadcast(NewRoomStateData);
+}
+
+void ADriveGameMode::StartGame()
+{
+	ChangeRoomState(ERoomState::Playing);
+}
+
+void ADriveGameMode::EndGame()
+{
+	ChangeRoomState(ERoomState::End);
+	DoResult();
+}
+
+void ADriveGameMode::DoResult()
+{
+	int32 MaxCoinScore = 0;
+
+	for (ADrivePlayerController* DPC : AllPlayers) {
+		ADrivePlayerState* DPS = DPC->GetPlayerState<ADrivePlayerState>();
+		if (!DPS) continue;
+
+		MaxCoinScore = FMath::Max(MaxCoinScore, DPS->GetCoin());
+	}
+
+	for (ADrivePlayerController* DPC : AllPlayers) {
+		ADrivePlayerState* DPS = DPC->GetPlayerState<ADrivePlayerState>();
+		if (!DPS) continue;
+
+		FChatMessage ResultMessage;
+		ResultMessage.ChatMessageType = EChatMessageType::Notice;
+		ResultMessage.Sender = "Server";
+		if (DPS->GetCoin() == MaxCoinScore) {
+			ResultMessage.Message = "Victory";
+		}
+		else {
+			ResultMessage.Message = "Defeat";
+		}
+		DPC->ClientRPCSendMessage(ResultMessage);
+	}
 }
