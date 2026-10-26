@@ -24,9 +24,14 @@ protected:
 protected:
 	FDelegateHandle NoticeHandle;
 
+	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> NoticeTextBlock;
+
+	FTimerHandle NoticeTimer;
 
 protected:
 	UFUNCTION()
 	void RecieveNotice(FChatMessage InChatMessage);
+
+	void DoCollapseNotice();
 };

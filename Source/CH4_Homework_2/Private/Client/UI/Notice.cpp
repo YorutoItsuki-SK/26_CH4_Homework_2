@@ -18,6 +18,8 @@ void UNotice::NativeConstruct()
 			NoticeHandle = DPC->OnChatRecived.AddUObject(this, &UNotice::RecieveNotice);
 		}
 	}
+
+	NoticeTextBlock->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UNotice::NativeDestruct()
@@ -36,6 +38,19 @@ void UNotice::NativeDestruct()
 void UNotice::RecieveNotice(FChatMessage InChatMessage)
 {
 	if (InChatMessage.ChatMessageType != EChatMessageType::Notice) return;
+	
+	/*if (UWorld* World = GetWorld()) {
+		if (World->GetTimerManager().IsTimerActive(NoticeTimer)) {
+			World->GetTimerManager().ClearTimer(NoticeTimer);
+		}
+		World->GetTimerManager().SetTimer(NoticeTimer, this, &UNotice::DoCollapseNotice, 10.f, false);
+	}*/
 
 	NoticeTextBlock->SetText(FText::FromString(InChatMessage.Message));
+	NoticeTextBlock->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UNotice::DoCollapseNotice()
+{
+	NoticeTextBlock->SetVisibility(ESlateVisibility::Collapsed);
 }
