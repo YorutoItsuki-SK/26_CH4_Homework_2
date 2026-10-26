@@ -3,6 +3,8 @@
 
 #include "Server/DriveGameState.h"
 
+#include "Server/DriveGameMode.h"
+
 #include "Net/UnrealNetwork.h"
 
 void ADriveGameState::SetRoomStateData(FRoomStateData InRoomStateData)
@@ -15,6 +17,18 @@ void ADriveGameState::SetRoomStateData(FRoomStateData InRoomStateData)
 FRoomStateData ADriveGameState::GetRoomStateData() const
 {
 	return RoomStateData;
+}
+
+void ADriveGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(!HasAuthority()) return;
+
+	ADriveGameMode* DGM = Cast<ADriveGameMode>(GetWorld()->GetAuthGameMode());
+	if (!DGM) return;
+
+	DGM->OnRoomStateChanged.AddUObject(this, &ADriveGameState::SetRoomStateData);
 }
 
 void ADriveGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

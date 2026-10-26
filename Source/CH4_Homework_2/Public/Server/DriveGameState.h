@@ -29,7 +29,11 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_RoomStateData)
 	FRoomStateData RoomStateData;
 
+	FDelegateHandle RoomStateHandle;
+
 protected:
+	virtual void BeginPlay() override;
+
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 protected:
