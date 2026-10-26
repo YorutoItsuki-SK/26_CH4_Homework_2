@@ -5,6 +5,7 @@
 
 #include "Client/DrivePlayerController.h"
 #include "Client/DrivePlayerState.h"
+#include "Server/DriveGameState.h"
 
 void ADriveGameMode::BroadcastNewChat(ADrivePlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
@@ -26,6 +27,7 @@ void ADriveGameMode::BroadcastNewChat(ADrivePlayerController* InChattingPlayerCo
 
 void ADriveGameMode::StealCoin(AController* Attacker, AController* Victim)
 {
+	if (RoomState != ERoomState::Playing) return;
 	if (!Attacker || !Victim) return;
 
 	ADrivePlayerState* AttackerPS = Attacker->GetPlayerState<ADrivePlayerState>();
@@ -49,7 +51,7 @@ void ADriveGameMode::PreLogin(const FString& Options, const FString& Address, co
 {
 	Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
 
-	if (RoomState == ERoomState::Waiting) {
+	if (RoomState == ERoomState::Waiting || RoomState == ERoomState::None) {
 		return;
 	}
 
@@ -71,6 +73,10 @@ void ADriveGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 
 	AllPlayers.Add(DPC);
+
+	if (AllPlayers.Num() >= 2) {
+		ChangeRoomState(ERoomState::Waiting);
+	}
 }
 
 void ADriveGameMode::Logout(AController* Exiting)
