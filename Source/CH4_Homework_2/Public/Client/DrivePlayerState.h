@@ -30,6 +30,8 @@ public:
 public:
 	void AddCoin(int32 InCoin);
 
+	void AddBonusMaxSpeed(int32 InBonusMaxSpeed);
+
 	void SubCoin(int32 OutCoin);
 
 	int32 GetCoin();
@@ -42,7 +44,6 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 protected:
-	void AddBonusMaxSpeed(int32 InBonusMaxSpeed);
 
 	UFUNCTION()
 	void OnRep_BonusMaxSpeed();
