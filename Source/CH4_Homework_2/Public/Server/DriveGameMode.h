@@ -7,7 +7,7 @@
 #include "Context/DriveStruct.h"
 #include "DriveGameMode.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnRoomStateChanged, ERoomState);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnRoomStateChanged, FRoomStateData);
 
 class ADrivePlayerController;
 
@@ -49,8 +49,14 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<ADrivePlayerController>> AllPlayers;
 
-
+	FTimerHandle RoomTimer;
 
 protected:
 	void ChangeRoomState(ERoomState InRoomState);
+
+	void StartGame();
+
+	void EndGame();
+
+	void DoResult();
 };
