@@ -17,11 +17,12 @@ ASpawner::ASpawner()
 
 }
 
-// Called when the game starts or when spawned
 void ASpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (!HasAuthority()) return;
+
 	if (SpawnItemClass) {
 		SpawnItem = GetWorld()->SpawnActor<ASpawnAbleItem>(SpawnItemClass, GetActorLocation(), GetActorRotation());
 		if (SpawnItem) {
@@ -34,7 +35,7 @@ void ASpawner::BeginPlay()
 	if (GM) {
 		ADriveGameMode* DGM = Cast<ADriveGameMode>(GM);
 		if (DGM) {
-			RoomStateHandle = DGM->OnRoomStateChanged.AddUObject(this, &ASpawner::SetRoomState);
+			RoomStateHandle = DGM->OnRoomStateChanged.AddUObject(this, &ASpawner::OnRecive_RoomState);
 			SetRoomState(DGM->GetRoomState());
 		}
 	}
@@ -45,6 +46,11 @@ void ASpawner::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, RoomState);
+}
+
+void ASpawner::OnRecive_RoomState(FRoomStateData InRoomStateData)
+{
+	SetRoomState(InRoomStateData.RoomState);
 }
 
 void ASpawner::SetRoomState(ERoomState InRoomState)

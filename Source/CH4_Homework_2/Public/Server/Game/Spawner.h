@@ -43,6 +43,8 @@ protected:
 
 protected:
 
+	void OnRecive_RoomState(FRoomStateData InRoomStateData);
+
 	void SetRoomState(ERoomState InRoomState);
 
 	UFUNCTION()
