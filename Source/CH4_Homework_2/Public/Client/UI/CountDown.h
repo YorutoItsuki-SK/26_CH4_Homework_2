@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Context/DriveStruct.h"
 #include "CountDown.generated.h"
 
 class UTextBlock;
+class ADriveGameState;
 
 /**
  * 
@@ -24,7 +26,24 @@ protected:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> TextBox;
+	TObjectPtr<UTextBlock> CounterText;
 
+	UPROPERTY()
+	TObjectPtr<ADriveGameState> CachedDGS;
+
+	FDelegateHandle RoomStateDataHandle;
+
+	FRoomStateData RoomStateData;
+
+	FTimerHandle CountDownTimerHandle;
+protected:
+	void SetRooumStateData(FRoomStateData InRoomStateData);
+
+	void DoApplyCountState();
+
+	void ClearCountDown();
 	
+	void ResetCountDown();
+
+	void UpdateCountDown();
 };
